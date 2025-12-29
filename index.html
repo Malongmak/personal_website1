@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joshua Malong|Portfolio</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Three.js for 3D effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body class="text-gray-100 overflow-x-hidden">
+    <div id="app">
+        <portfolio-app></portfolio-app>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    
+    <style>
+        :root {
+            /* Professional Dark Theme with Enhanced Contrast */
+            --primary: #0f172a;      /* Dark blue background */
+            --secondary: #1e293b;    /* Slightly lighter for cards */
+            --accent: #3b82f6;       /* Blue accent */
+            --highlight: #10b981;    /* Green highlight */
+            --text: #ffffff;          /* Pure white text for maximum contrast */
+            --text-muted: #cbd5e1;   /* Light gray for muted text */
+            --border: #475569;       /* Lighter border color */
+            --card-bg: rgba(30, 41, 59, 0.95); /* Enhanced glass effect */
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--primary);
+            color: var(--text);
+            overflow-x: hidden;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+        
+        h1, h2, h3, h4, h5 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Background with subtle pattern */
+        .bg-strategic {
+            background-color: var(--primary);
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+                linear-gradient(180deg, var(--primary) 0%, #1a2236 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 3D Abstract Data Network Container */
+        #three-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        
+        /* Digital Network Lines (subtle) */
+        .network-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            height: 1px;
+            width: 100%;
+            opacity: 0.1;
+        }
+        
+        /* Micro-interactions with purpose */
+        .hover-purpose {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+        
+        .hover-purpose:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Glowing loader for loading states */
+        .glowing-loader {
+            width: 40px;
+            height: 40px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            position: relative;
+        }
+        
+        .glowing-loader::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--highlight);
+            animation: spin 1.5s linear infinite reverse;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Content-focused animations */
+        .fade-in-on-view {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .fade-in-on-view.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Skill Bar Animation (visualizes expertise) */
+        .skill-bar-container {
+            margin-bottom: 1.2rem;
+        }
+        
+        .skill-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .skill-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--highlight));
+            border-radius: 3px;
+            width: 0;
+            transition: width 1.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        
+        /* Card Design with glass effect */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        /* Navigation with micro-interactions - CENTERED */
+        .nav-micro {
+            position: relative;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+        }
+        
+        .nav-micro::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--highlight));
+            transition: width 0.3s ease;
+        }
+        
+        .nav-micro:hover::after {
+            width: 80%;
+        }
+        
+        .nav-micro.active {
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        .nav-micro.active::after {
+            width: 80%;
+        }
+        
+        /* Terminal Typing Effect (shows technical skill) */
+        .terminal-typing {
+            overflow: hidden;
+            border-right: 2px solid var(--accent);
+            white-space: nowrap;
+            animation: typing 3.5s steps(40, end), blink 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        @keyframes blink {
+            from, to { border-color: transparent }
+            50% { border-color: var(--accent) }
+        }
+        
+        /* Pulse for important elements */
+        .pulse-subtle {
+            animation: pulse-subtle 3s infinite;
+        }
+        
+        @keyframes pulse-subtle {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+        }
+        
+        /* Enhanced text visibility rules */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text) !important;
+            font-weight: 600;
+        }
+        
+        p, span, div, li, a {
+            color: inherit;
+        }
+        
+        .text-white {
+            color: #ffffff !important;
+        }
+        
+        .text-accent {
+            color: var(--accent) !important;
+        }
+        
+        .text-highlight {
+            color: var(--highlight) !important;
+        }
+        
+        .text-text-muted {
+            color: var(--text-muted) !important;
+        }
+        
+        /* Ensure all text elements have proper contrast */
+        body, .glass-card, .bg-secondary {
+            color: var(--text) !important;
+        }
+        
+        .text-text-muted {
+            color: var(--text-muted) !important;
+        }
+        
+        /* FIX: Ensure text is visible in form inputs */
+        input, select, textarea {
+            color: var(--text) !important;
+            background-color: var(--secondary) !important;
+            border: 1px solid var(--border) !important;
+        }
+        
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted) !important;
+            opacity: 1;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+        }
+        
+        /* Fix form labels */
+        label {
+            color: var(--text) !important;
+            font-weight: 500;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            #three-container {
+                opacity: 0.1;
+            }
+            
+            .glass-card {
+                backdrop-filter: blur(5px);
+            }
+            
+            .nav-micro {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            #three-container,
+            .network-lines {
+                display: none !important;
+            }
+            
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            
+            .glass-card {
+                background: white !important;
+                border: 1px solid #ddd !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
+
+    <script>
+        // ==================== THREE.JS 3D ABSTRACT DATA NETWORK ====================
+        class ThreeDataNetwork {
+            constructor() {
+                this.container = document.getElementById('three-container');
+                if (!this.container) return;
+                
+                // Scene
+                this.scene = new THREE.Scene();
+                
+                // Camera
+                this.camera = new THREE.PerspectiveCamera(
+                    75,
+                    this.container.clientWidth / this.container.clientHeight,
+                    0.1,
+                    1000
+                );
+                this.camera.position.z = 8;
+                
+                // Renderer
+                this.renderer = new THREE.WebGLRenderer({
+                    alpha: true,
+                    antialias: true
+                });
+                this.renderer.setSize(
+                    this.container.clientWidth,
+                    this.container.clientHeight
+                );
+                this.renderer.setClearColor(0x000000, 0);
+                this.container.appendChild(this.renderer.domElement);
+                
+                // Create data network
+                this.createNetwork();
+                
+                // Animation loop
+                this.animate();
+                
+                // Handle resize
+                window.addEventListener('resize', () => this.onResize());
+            }
+            
+            createNetwork() {
+                // Create central data hub (sphere)
+                const hubGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+                const hubMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x3b82f6,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                
+                this.hub = new THREE.Mesh(hubGeometry, hubMaterial);
+                this.scene.add(this.hub);
+                
+                // Create data nodes
+                this.nodes = [];
+                const nodeCount = 8;
+                
+                for (let i = 0; i < nodeCount; i++) {
+                    // Create node
+                    const nodeGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+                    const nodeMaterial = new THREE.MeshBasicMaterial({
+                        color: 0x10b981,
+                        transparent: true,
+                        opacity: 0.2
+                    });
+                    
+                    const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+                    
+                    // Position in a sphere around hub
+                    const radius = 2 + Math.random() * 2;
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.random() * Math.PI;
+                    
+                    node.position.x = radius * Math.sin(phi) * Math.cos(theta);
+                    node.position.y = radius * Math.sin(phi) * Math.sin(theta);
+                    node.position.z = radius * Math.cos(phi);
+                    
+                    node.userData = {
+                        originalX: node.position.x,
+                        originalY: node.position.y,
+                        originalZ: node.position.z,
+                        speed: 0.3 + Math.random() * 0.3
+                    };
+                    
+                    this.nodes.push(node);
+                    this.scene.add(node);
+                }
+            }
+            
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                
+                const time = Date.now() * 0.001;
+                
+                // Rotate hub
+                if (this.hub) {
+                    this.hub.rotation.x += 0.003;
+                    this.hub.rotation.y += 0.003;
+                }
+                
+                // Animate nodes
+                this.nodes.forEach((node, i) => {
+                    const data = node.userData;
+                    
+                    // Subtle floating motion
+                    node.position.x = data.originalX + Math.sin(time * data.speed) * 0.2;
+                    node.position.y = data.originalY + Math.cos(time * data.speed * 1.3) * 0.2;
+                    node.position.z = data.originalZ + Math.sin(time * data.speed * 0.7) * 0.2;
+                });
+                
+                // Render
+                this.renderer.render(this.scene, this.camera);
+            }
+            
+            onResize() {
+                this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(
+                    this.container.clientWidth,
+                    this.container.clientHeight
+                );
+            }
+        }
+        
+        // ==================== VUE PORTFOLIO COMPONENT ====================
+        Vue.component('portfolio-app', {
+            template: `
+                <div class="min-h-screen bg-strategic">
+                    <!-- 3D Data Network Background -->
+                    <div id="three-container"></div>
+                    
+                    <!-- Loading State -->
+                    <div v-if="loading" class="fixed inset-0 bg-primary flex items-center justify-center z-50">
+                        <div class="text-center">
+                            <div class="glowing-loader mx-auto mb-6"></div>
+                            <div class="terminal-typing text-xl text-accent mono-font">
+                                Loading Cybersecurity Portfolio
+                            </div>
+                            <div class="mt-4 text-text-muted mono-font">Initializing secure systems...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Main Content -->
+                    <div v-show="!loading" class="relative z-10">
+                        <!-- Header with CENTERED NAVBAR -->
+                        <header class="sticky top-0 z-50 bg-primary/90 backdrop-blur-sm border-b border-border">
+                            <div class="container mx-auto px-6 py-4">
+                                <!-- Desktop Navigation - FULLY CENTERED -->
+                                <div class="hidden md:flex justify-center items-center">
+                                    <nav class="flex space-x-1">
+                                        <a v-for="(item, index) in navItems" 
+                                           :key="index"
+                                           :href="'#' + item.id"
+                                           @click.prevent="scrollTo(item.id)"
+                                           class="nav-micro"
+                                           :class="{ 'active': activeSection === item.id }">
+                                            <span class="mono-font text-sm font-medium">{{ item.label }}</span>
+                                        </a>
+                                    </nav>
+                                </div>
+                                
+                                <!-- Mobile Header -->
+                                <div class="flex md:hidden justify-between items-center">
+                                    <!-- Logo -->
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-highlight flex items-center justify-center">
+                                            <span class="text-white font-bold text-xs mono-font">JM</span>
+                                        </div>
+                                        <div>
+                                            <h1 class="text-sm font-bold text-white">Joshua Malong</h1>
+                                            <p class="text-xs text-accent mono-font">Cybersecurity</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Mobile Menu Button -->
+                                    <button @click="toggleMenu" class="text-text-muted">
+                                        <div class="space-y-1">
+                                            <div class="w-6 h-0.5 bg-accent"></div>
+                                            <div class="w-6 h-0.5 bg-accent"></div>
+                                            <div class="w-6 h-0.5 bg-accent"></div>
+                                        </div>
+                                    </button>
+                                </div>
+                                
+                                <!-- Mobile Menu -->
+                                <div v-if="menuOpen" class="mt-4 md:hidden border-t border-border pt-4">
+                                    <div class="space-y-2">
+                                        <a v-for="(item, index) in navItems" 
+                                           :key="index"
+                                           :href="'#' + item.id"
+                                           @click.prevent="scrollTo(item.id); menuOpen = false"
+                                           class="block py-3 text-text-muted hover:text-accent transition-colors text-center"
+                                           :class="{ 'text-accent font-medium': activeSection === item.id }">
+                                            <span class="mono-font">{{ item.label }}</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+                        
+                        <!-- Hero Section -->
+                        <section id="home" class="min-h-screen flex items-center relative py-20">
+                            <div class="container mx-auto px-6">
+                                <div class="max-w-6xl mx-auto">
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                                        <!-- Left Content -->
+                                        <div class="fade-in-on-view" :class="{ 'visible': heroVisible }">
+                                            <div class="mb-8">
+                                                <span class="inline-block px-4 py-2 bg-accent/10 text-accent rounded-full text-sm mono-font mb-6 border border-accent/30">
+                                                    Detection & Response Cybersecurity
+                                                </span>
+                                                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
+                                                    Joshua Malong
+                                                    <span class="text-accent block">Maker Duol</span>
+                                                </h1>
+                                                <div class="terminal-typing text-xl text-text-muted mb-8 mono-font">
+                                                    Seeking Security Engineering roles at Meta, Google, or Microsoft
+                                                </div>
+                                            </div>
+                                            
+                                            <p class="text-lg text-text-muted mb-10">
+                                                Cybersecurity professional with a Bachelor's degree in Software Engineering, 
+                                                focused on threat detection, secure data systems, and IT operations across 
+                                                humanitarian and international organizations.
+                                            </p>
+                                            
+                                            <!-- CTA Buttons -->
+                                            <div class="flex flex-wrap gap-4 mb-12">
+                                                <button @click="scrollTo('experience')" 
+                                                        class="group relative px-8 py-3 bg-gradient-to-r from-accent to-blue-600 text-white font-medium rounded-lg overflow-hidden hover-purpose">
+                                                    <span class="relative z-10">View Experience</span>
+                                                    <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                                                </button>
+                                                
+                                                <a href="#contact" @click.prevent="scrollTo('contact')"
+                                                   class="group relative px-8 py-3 border-2 border-highlight text-highlight rounded-lg overflow-hidden hover-purpose">
+                                                    <span class="relative z-10">Contact Me</span>
+                                                    <div class="absolute inset-0 bg-highlight/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                                </a>
+                                            </div>
+                                            
+                                            <!-- Quick Stats -->
+                                            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                                <div v-for="(stat, index) in quickStats" :key="index"
+                                                     class="glass-card p-4 text-center hover-purpose">
+                                                    <div class="text-2xl font-bold text-accent mb-2">{{ stat.value }}</div>
+                                                    <div class="text-sm text-text-muted mono-font">{{ stat.label }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Right Content - Terminal -->
+                                        <div class="fade-in-on-view" :class="{ 'visible': heroVisible }" style="transition-delay: 0.2s">
+                                            <div class="glass-card overflow-hidden hover-purpose">
+                                                <div class="bg-secondary/50 p-4 border-b border-border">
+                                                    <div class="flex items-center">
+                                                        <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                                                        <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                                                        <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                                                        <span class="text-text-muted text-sm ml-4 mono-font">terminal ~/portfolio</span>
+                                                    </div>
+                                                </div>
+                                                <div class="p-8">
+                                                    <!-- Profile Image -->
+                                                    <div class="w-48 h-48 mx-auto rounded-full overflow-hidden border-4 border-accent/30 mb-8 relative">
+                                                        <div class="w-full h-full bg-gradient-to-br from-accent to-highlight flex items-center justify-center">
+                                                            <div class="text-center">
+                                                                <span class="text-white text-5xl font-bold block">JM</span>
+                                                                <span class="text-white text-sm mt-2 block mono-font">Cybersecurity</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Terminal Content -->
+                                                    <div class="space-y-4">
+                                                        <div class="flex items-center">
+                                                            <span class="text-highlight mono-font mr-2">$</span>
+                                                            <span class="text-white mono-font">whoami</span>
+                                                        </div>
+                                                        <div class="text-accent ml-4 mono-font">Joshua Malong Maker Duol</div>
+                                                        
+                                                        <div class="flex items-center">
+                                                            <span class="text-highlight mono-font mr-2">$</span>
+                                                            <span class="text-white mono-font">current_role</span>
+                                                        </div>
+                                                        <div class="text-accent ml-4 mono-font">Detection & Response Cybersecurity</div>
+                                                        
+                                                        <div class="flex items-center">
+                                                            <span class="text-highlight mono-font mr-2">$</span>
+                                                            <span class="text-white mono-font">target_companies</span>
+                                                        </div>
+                                                        <div class="text-highlight ml-4 mono-font">[Meta, Google, Microsoft]</div>
+                                                        
+                                                        <div class="flex items-center">
+                                                            <span class="text-highlight mono-font mr-2">$</span>
+                                                            <span class="text-white mono-font">status --security</span>
+                                                        </div>
+                                                        <div class="flex items-center ml-4">
+                                                            <div class="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                                                            <span class="text-green-500 mono-font">Systems Secure</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- About Section -->
+                        <section id="about" class="py-20">
+                            <div class="container mx-auto px-6">
+                                <div class="max-w-5xl mx-auto">
+                                    <div class="text-center mb-16 fade-in-on-view" :class="{ 'visible': aboutVisible }">
+                                        <h2 class="text-4xl font-bold mb-6 text-white">Professional Summary</h2>
+                                        <div class="w-24 h-1 bg-gradient-to-r from-accent to-highlight mx-auto rounded"></div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                        <!-- Main Card -->
+                                        <div class="lg:col-span-2 glass-card p-8 hover-purpose fade-in-on-view" :class="{ 'visible': aboutVisible }">
+                                            <div class="flex items-center mb-8">
+                                                <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mr-4">
+                                                    <i class="fas fa-user-shield text-accent text-xl"></i>
+                                                </div>
+                                                <h3 class="text-2xl font-bold text-white">Cybersecurity Focus</h3>
+                                            </div>
+                                            
+                                            <div class="space-y-4 text-text-muted">
+                                                <p>Detection & Response-focused cybersecurity professional with a Bachelor's degree in Software Engineering and multiple security certifications. Experienced in supporting secure data systems, threat detection, automation, and IT operations across humanitarian, research, and international organizations.</p>
+                                                <p>Strong background in software engineering, low-level programming, and data protection. Currently seeking Security Engineering, SOC, or Detection & Response roles at leading technology organizations including Meta, Google, and Microsoft.</p>
+                                            </div>
+                                            
+                                            <div class="mt-8 pt-8 border-t border-border">
+                                                <h4 class="text-lg font-bold mb-4 text-white">Technical Philosophy</h4>
+                                                <div class="bg-secondary/50 p-6 rounded-lg">
+                                                    <p class="text-text-muted italic mono-font">
+                                                        "Effective cybersecurity is not just about building stronger walls, but about understanding the entire ecosystem—people, processes, and technology—to create resilient systems that protect while enabling progress."
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Skills Card -->
+                                        <div class="glass-card p-8 hover-purpose fade-in-on-view" :class="{ 'visible': aboutVisible }" style="transition-delay: 0.1s">
+                                            <div class="flex items-center mb-8">
+                                                <div class="w-12 h-12 rounded-full bg-highlight/10 flex items-center justify-center mr-4">
+                                                    <i class="fas fa-star text-highlight text-xl"></i>
+                                                </div>
+                                                <h3 class="text-2xl font-bold text-white">Core Competencies</h3>
+                                            </div>
+                                            
+                                            <div class="space-y-6">
+                                                <div v-for="(skill, index) in coreSkills" :key="index" class="skill-bar-container">
+                                                    <div class="flex justify-between mb-2">
+                                                        <span class="font-medium text-white">{{ skill.name }}</span>
+                                                        <span class="text-accent mono-font">{{ skill.level }}%</span>
+                                                    </div>
+                                                    <div class="skill-bar">
+                                                        <div class="skill-progress" :ref="'skill-' + index" :data-width="skill.level"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-8 pt-8 border-t border-border">
+                                                <h4 class="text-lg font-bold mb-4 mono-font text-white">Security Domains</h4>
+                                                <div class="flex flex-wrap gap-2">
+                                                    <span v-for="(domain, index) in securityDomains" :key="index" 
+                                                          class="px-3 py-1 bg-accent/10 text-accent text-sm rounded border border-accent/30 mono-font hover-purpose">
+                                                        {{ domain }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Experience Section (INCLUDING IOM) -->
+                        <section id="experience" class="py-20">
+                            <div class="container mx-auto px-6">
+                                <div class="max-w-5xl mx-auto">
+                                    <div class="text-center mb-16 fade-in-on-view" :class="{ 'visible': experienceVisible }">
+                                        <h2 class="text-4xl font-bold mb-6 text-white">Professional Experience</h2>
+                                        <div class="w-24 h-1 bg-gradient-to-r from-accent to-highlight mx-auto rounded"></div>
+                                    </div>
+                                    
+                                    <!-- Timeline -->
+                                    <div class="relative pl-8">
+                                        <!-- Vertical Line -->
+                                        <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-accent to-highlight"></div>
+                                        
+                                        <!-- Timeline Items -->
+                                        <div v-for="(exp, index) in experiences" :key="index" 
+                                             class="relative mb-12 fade-in-on-view" 
+                                             :class="{ 'visible': experienceVisible }"
+                                             :style="{ transitionDelay: (index * 0.1) + 's' }">
+                                            <!-- Timeline Dot -->
+                                            <div class="absolute left-[-15px] top-2 w-8 h-8 rounded-full bg-accent border-4 border-primary pulse-subtle"></div>
+                                            
+                                            <!-- Content Card -->
+                                            <div class="glass-card p-6 ml-8 hover-purpose">
+                                                <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                                                    <div>
+                                                        <h3 class="text-xl font-bold text-white">{{ exp.title }}</h3>
+                                                        <h4 class="text-lg text-accent">{{ exp.organization }}</h4>
+                                                        <p class="text-text-muted text-sm mt-1 mono-font">{{ exp.location }}</p>
+                                                    </div>
+                                                    <span class="inline-block px-3 py-1 bg-accent/10 text-accent text-sm rounded-full mt-2 md:mt-0 mono-font">
+                                                        {{ exp.duration }}
+                                                    </span>
+                                                </div>
+                                                
+                                                <p class="text-text-muted mb-4">{{ exp.description }}</p>
+                                                
+                                                <div v-if="exp.achievements" class="mt-4">
+                                                    <h5 class="font-bold text-accent mb-2 mono-font">Key Contributions:</h5>
+                                                    <ul class="list-disc pl-5 text-text-muted space-y-1">
+                                                        <li v-for="(achievement, aIndex) in exp.achievements" :key="aIndex">{{ achievement }}</li>
+                                                    </ul>
+                                                </div>
+                                                
+                                                <div v-if="exp.technologies" class="mt-4">
+                                                    <div class="flex flex-wrap gap-2">
+                                                        <span v-for="(tech, tIndex) in exp.technologies" :key="tIndex" 
+                                                              class="text-xs text-text-muted mono-font border border-border px-2 py-1 rounded hover-purpose">
+                                                            {{ tech }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Certifications Section -->
+                        <section id="certifications" class="py-20">
+                            <div class="container mx-auto px-6">
+                                <div class="max-w-5xl mx-auto">
+                                    <div class="text-center mb-16 fade-in-on-view" :class="{ 'visible': certificationsVisible }">
+                                        <h2 class="text-4xl font-bold mb-6 text-white">Certifications & Training</h2>
+                                        <div class="w-24 h-1 bg-gradient-to-r from-accent to-highlight mx-auto rounded"></div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                        <div v-for="(cert, index) in certifications" :key="index" 
+                                             class="glass-card p-8 hover-purpose fade-in-on-view"
+                                             :class="{ 'visible': certificationsVisible }"
+                                             :style="{ transitionDelay: (index * 0.1) + 's' }">
+                                            <div class="flex items-center mb-6">
+                                                <div class="w-12 h-12 rounded-full flex items-center justify-center mr-4" :class="cert.color">
+                                                    <i :class="cert.icon + ' text-white text-xl'"></i>
+                                                </div>
+                                                <div>
+                                                    <h3 class="text-xl font-bold text-white">{{ cert.name }}</h3>
+                                                    <p class="text-text-muted text-sm mono-font">{{ cert.issuer }}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <p class="text-text-muted mb-4">{{ cert.description }}</p>
+                                            
+                                            <div class="mt-6 flex justify-between items-center">
+                                                <span class="text-sm text-accent mono-font">{{ cert.year }}</span>
+                                                <span v-if="cert.credentialId" class="text-xs text-text-muted mono-font">ID: {{ cert.credentialId }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Contact Section -->
+                        <section id="contact" class="py-20">
+                            <div class="container mx-auto px-6">
+                                <div class="max-w-5xl mx-auto">
+                                    <div class="text-center mb-16 fade-in-on-view" :class="{ 'visible': contactVisible }">
+                                        <h2 class="text-4xl font-bold mb-6 text-white">Contact</h2>
+                                        <div class="w-24 h-1 bg-gradient-to-r from-accent to-highlight mx-auto rounded"></div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                        <!-- Contact Info -->
+                                        <div class="glass-card p-8 hover-purpose fade-in-on-view" :class="{ 'visible': contactVisible }">
+                                            <h3 class="text-2xl font-bold mb-8 text-white">Contact Information</h3>
+                                            
+                                            <div class="space-y-6 mb-10">
+                                                <div class="flex items-start">
+                                                    <div class="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center mr-4 mt-1">
+                                                        <i class="fas fa-envelope text-accent"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="font-bold text-white">Email</h4>
+                                                        <p class="text-text-muted mono-font">j.malong@alustudent.com</p>
+                                                        <p class="text-sm text-text-muted/70 mt-1">Primary contact</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="flex items-start">
+                                                    <div class="w-10 h-10 rounded-full bg-highlight/10 flex items-center justify-center mr-4 mt-1">
+                                                        <i class="fas fa-phone text-highlight"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="font-bold text-white">Phone</h4>
+                                                        <p class="text-text-muted mono-font">+254 715767367</p>
+                                                        <p class="text-sm text-text-muted/70 mt-1">Mobile</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="flex items-start">
+                                                    <div class="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center mr-4 mt-1">
+                                                        <i class="fas fa-map-marker-alt text-accent"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="font-bold text-white">Location</h4>
+                                                        <p class="text-text-muted mono-font">Turkana County, Kenya</p>
+                                                        <p class="text-sm text-text-muted/70 mt-1">Available for remote positions</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <h4 class="text-lg font-bold mb-6 mono-font text-white">Professional Profiles</h4>
+                                                <div class="flex space-x-4">
+                                                    <a v-for="(profile, index) in profiles" 
+                                                       :key="index" 
+                                                       :href="profile.link" 
+                                                       target="_blank"
+                                                       class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover-purpose"
+                                                       :class="profile.color">
+                                                        <i :class="profile.icon + ' text-white'"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Contact Form -->
+                                        <div class="lg:col-span-2 glass-card p-8 hover-purpose fade-in-on-view" :class="{ 'visible': contactVisible }" style="transition-delay: 0.1s">
+                                            <div class="flex items-center mb-8">
+                                                <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                                                <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                                                <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                                                <span class="text-text-muted text-sm ml-4 mono-font">system ~/send_message</span>
+                                            </div>
+                                            
+                                            <form @submit.prevent="submitContact" class="space-y-6">
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div>
+                                                        <label class="block text-text font-medium mb-2">Your Name</label>
+                                                        <input type="text" v-model="contact.name" required 
+                                                               class="w-full px-4 py-3 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:border-accent transition-colors" placeholder="Enter your name">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-text font-medium mb-2">Your Email</label>
+                                                        <input type="email" v-model="contact.email" required 
+                                                               class="w-full px-4 py-3 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:border-accent transition-colors" placeholder="Enter your email">
+                                                    </div>
+                                                </div>
+                                                
+                                                <div>
+                                                    <label class="block text-text font-medium mb-2">Subject</label>
+                                                    <select v-model="contact.subject" required 
+                                                            class="w-full px-4 py-3 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:border-accent transition-colors">
+                                                        <option value="">Select a subject</option>
+                                                        <option value="Security Engineering Opportunity">Security Engineering Opportunity</option>
+                                                        <option value="SOC Role Inquiry">SOC Role Inquiry</option>
+                                                        <option value="Detection & Response Position">Detection & Response Position</option>
+                                                        <option value="Research Collaboration">Research Collaboration</option>
+                                                        <option value="Speaking Engagement">Speaking Engagement</option>
+                                                        <option value="Other">Other</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <div>
+                                                    <label class="block text-text font-medium mb-2">Message</label>
+                                                    <textarea v-model="contact.message" required rows="6"
+                                                              class="w-full px-4 py-3 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:border-accent transition-colors" placeholder="Enter your message"></textarea>
+                                                </div>
+                                                
+                                                <button type="submit" 
+                                                        class="group relative px-8 py-3 bg-gradient-to-r from-accent to-accent/80 text-white font-medium rounded-lg overflow-hidden hover-purpose">
+                                                    <span class="relative z-10">Send Message</span>
+                                                    <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                                                </button>
+                                                
+                                                <div v-if="formSubmitted" class="mt-4 p-4 bg-highlight/10 text-highlight rounded-lg border border-highlight/30">
+                                                    <div class="flex items-center">
+                                                        <div class="glowing-loader w-6 h-6 mr-3"></div>
+                                                        <span class="mono-font">Message sent successfully. I'll respond within 24-48 hours.</span>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Footer -->
+                        <footer class="py-12 bg-secondary border-t border-border">
+                            <div class="container mx-auto px-6">
+                                <div class="flex flex-col md:flex-row justify-between items-center">
+                                    <div class="mb-6 md:mb-0">
+                                        <div class="flex items-center mb-4">
+                                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-highlight flex items-center justify-center mr-4">
+                                                <span class="text-white font-bold mono-font">JM</span>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-xl font-bold text-white">Joshua Malong Maker Duol</h3>
+                                                <p class="text-text-muted text-sm mono-font">Cybersecurity & Software Engineering Portfolio</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-text-muted/70 mono-font"> 2023. All rights reserved.</p>
+                                    </div>
+                                    
+                                    <div class="flex space-x-6">
+                                        <a v-for="(profile, index) in profiles" 
+                                           :key="index" 
+                                           :href="profile.link" 
+                                           target="_blank"
+                                           class="text-text-muted hover:text-accent transition-colors duration-300 hover-purpose">
+                                            <i :class="profile.icon"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-12 pt-8 border-t border-border text-center text-text-muted/70 text-sm mono-font">
+                                    <p>© {{ currentYear }} Joshua Malong Maker Duol. All rights reserved.</p>
+                                </div>
+                            </div>
+                        </footer>
+                        
+                        <!-- Back to Top Button -->
+                        <button v-if="showTopButton" @click="scrollTo('home')" 
+                                class="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-gradient-to-br from-accent to-highlight text-white shadow-lg hover-purpose z-40">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <script>
+                new Vue({
+                    el: '#app',
+                    data() {
+                        return {
+                            loading: true,
+                            menuOpen: false,
+                            activeSection: 'home',
+                            showTopButton: false,
+                            heroVisible: false,
+                            aboutVisible: false,
+                            experienceVisible: false,
+                            certificationsVisible: false,
+                            contactVisible: false,
+                            formSubmitted: false,
+                            currentYear: new Date().getFullYear(),
+                            contact: {
+                                name: '',
+                                email: '',
+                                subject: '',
+                                message: ''
+                            },
+                            navItems: [
+                                { id: 'home', label: 'Home' },
+                                { id: 'about', label: 'Summary' },
+                                { id: 'experience', label: 'Experience' },
+                                { id: 'certifications', label: 'Certifications' },
+                                { id: 'contact', label: 'Contact' }
+                            ],
+                            quickStats: [
+                                { value: '5+', label: 'Years Experience' },
+                                { value: '250+', label: 'Youth Impacted' },
+                                { value: '4', label: 'Certifications' },
+                                { value: '10+', label: 'Projects' }
+                            ],
+                            coreSkills: [
+                                { name: 'Threat Detection & Response', level: 92 },
+                                { name: 'Data Modeling & Normalization', level: 88 },
+                                { name: 'Entity-Relationship Diagrams', level: 85 },
+                                { name: 'Secure System Architecture', level: 87 },
+                                { name: 'IT Operations & Automation', level: 83 },
+                                { name: 'Low-Level Programming', level: 79 }
+                            ],
+                            securityDomains: ['Threat Intelligence', 'Incident Response', 'Secure Coding', 'Cloud Security', 'Digital Forensics', 'Security Automation'],
+                            experiences: [
+                                {
+                                    title: 'Information Technology Lead',
+                                    organization: 'Lead Research Center',
+                                    location: 'South Sudan',
+                                    duration: 'Feb 2025 - Present',
+                                    description: 'Leading IT infrastructure and security initiatives for research center operations.',
+                                    achievements: [
+                                        'Implemented secure data systems for research data protection',
+                                        'Developed threat detection protocols for sensitive information',
+                                        'Managed IT operations across multiple research projects'
+                                    ],
+                                    technologies: ['Network Security', 'Data Protection', 'IT Operations']
+                                },
+                                {
+                                    title: 'Climate Change & Human Mobility Design and Innovation Challenge Participant',
+                                    organization: 'IOM - UN Migration',
+                                    location: 'Geneva, Switzerland',
+                                    duration: 'Oct 2025 - Dec 2025',
+                                    description: 'Participated in a design challenge focused on creating infrastructure solutions for climate-driven displacement in partnership with African Leadership Academy.',
+                                    achievements: [
+                                        'Co-created actionable infrastructure solutions addressing climate-driven displacement',
+                                        'Researched and designed practical solutions with digital, social, and ecological components',
+                                        'Presented innovative designs to mentors, experts, and potential funders'
+                                    ],
+                                    technologies: ['Design Thinking', 'Climate Innovation', 'Prototyping']
+                                },
+                                {
+                                    title: 'Chief Financial Officer (CFO)',
+                                    organization: 'South Sudan Youth Leadership Scholars Network Program',
+                                    location: 'South Sudan',
+                                    duration: 'Sep 2023 - Present',
+                                    description: 'Financial leadership for a youth-led NGO addressing educational deprivation in South Sudan.',
+                                    achievements: [
+                                        'Oversaw financial operations for national NGO with 250+ beneficiaries',
+                                        'Developed funding strategies for educational programs',
+                                        'Managed budgets for Refugee Nexus Hub initiative'
+                                    ],
+                                    technologies: ['Financial Management', 'Budget Planning', 'Grant Writing']
+                                },
+                                {
+                                    title: 'Co-Founder',
+                                    organization: 'konnectafrica',
+                                    location: 'Juba, South Sudan',
+                                    duration: 'May 2023 - Sep 2025',
+                                    description: 'Co-founded an organization connecting African youth with technology and entrepreneurship opportunities.',
+                                    achievements: [
+                                        'Established organizational structure and strategic vision',
+                                        'Developed partnership networks across 5 African countries',
+                                        'Created technology education programs reaching 500+ youth'
+                                    ],
+                                    technologies: ['Entrepreneurship', 'Partnership Development', 'Program Management']
+                                },
+                                {
+                                    title: 'Software Development Intern',
+                                    organization: 'SaiKet Systems',
+                                    location: 'Pune, India',
+                                    duration: 'Dec 2024 - Feb 2025',
+                                    description: 'Developed efficient and scalable applications while honing debugging and problem-solving skills.',
+                                    achievements: [
+                                        'Created maintainable, well-structured code following best practices',
+                                        'Collaborated with teams using Agile methodologies',
+                                        'Enhanced debugging skills through problem-solving platforms'
+                                    ],
+                                    technologies: ['Agile Development', 'Debugging', 'Software Design']
+                                }
+                            ],
+                            certifications: [
+                                {
+                                    name: 'Certified Ethical Hacker (CEH)',
+                                    issuer: 'EC-Council',
+                                    year: '2023',
+                                    description: 'Comprehensive ethical hacking and penetration testing certification.',
+                                    icon: 'fas fa-user-secret',
+                                    color: 'bg-gradient-to-br from-red-500 to-red-700',
+                                    credentialId: 'ECC123456'
+                                },
+                                {
+                                    name: 'Database Design',
+                                    issuer: 'ALX',
+                                    year: '2023',
+                                    description: 'Specialized training in database normalization and data modeling.',
+                                    icon: 'fas fa-database',
+                                    color: 'bg-gradient-to-br from-blue-500 to-blue-700'
+                                },
+                                {
+                                    name: 'Introduction to Cybersecurity',
+                                    issuer: 'ALX',
+                                    year: '2023',
+                                    description: 'Foundational cybersecurity principles and practices.',
+                                    icon: 'fas fa-shield-alt',
+                                    color: 'bg-gradient-to-br from-green-500 to-green-700'
+                                },
+                                {
+                                    name: 'Cyber/Computer Forensics',
+                                    issuer: 'Moringa School',
+                                    year: '2025',
+                                    description: 'Specialized training in digital forensics and evidence handling.',
+                                    icon: 'fas fa-search',
+                                    color: 'bg-gradient-to-br from-purple-500 to-purple-700'
+                                }
+                            ],
+                            profiles: [
+                                { 
+                                    name: 'LinkedIn', 
+                                    icon: 'fab fa-linkedin-in', 
+                                    link: 'https://www.linkedin.com/in/joshua-malong',
+                                    color: 'bg-blue-600'
+                                },
+                                { 
+                                    name: 'GitHub', 
+                                    icon: 'fab fa-github', 
+                                    link: 'https://malongmak.github.io/Malong-Maker-portf010',
+                                    color: 'bg-gray-800'
+                                },
+                                { 
+                                    name: 'Google Scholar', 
+                                    icon: 'fas fa-graduation-cap', 
+                                    link: 'https://scholar.google.com/citations',
+                                    color: 'bg-green-600'
+                                },
+                                { 
+                                    name: 'Portfolio', 
+                                    icon: 'fas fa-link', 
+                                    link: 'https://linktr.ee/Malong_Maker',
+                                    color: 'bg-yellow-500'
+                                }
+                            ]
+                        }
+                                           :key="index" 
+                                           :href="profile.link" 
+                                           target="_blank"
+                                           class="text-text-muted hover:text-accent transition-colors duration-300 hover-purpose">
+                                            <i :class="profile.icon"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-12 pt-8 border-t border-accent/20 text-center text-text-muted/70 text-sm mono-font">
+                                    <p>Available for Security Engineering, SOC, and Detection Response at Meta, Google, and Microsoft.</p>
+                                    <p class="mt-2">Designed with strategic color psychology and purposeful animations.</p>
+                                </div>
+                            </div>
+                        </footer>
+                        
+                        <!-- Back to Top Button -->
+                        <button v-if="showTopButton" @click="scrollTo('home')" 
+                                class="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-gradient-to-br from-accent to-highlight text-white shadow-lg hover-purpose z-40 pulse-subtle">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    loading: true,
+                    menuOpen: false,
+                    activeSection: 'home',
+                    showTopButton: false,
+                    heroVisible: false,
+                    aboutVisible: false,
+                    experienceVisible: false,
+                    certificationsVisible: false,
+                    contactVisible: false,
+                    formSubmitted: false,
+                    currentYear: new Date().getFullYear(),
+                    contact: {
+                        name: '',
+                        email: '',
+                        subject: '',
+                        message: ''
+                    },
+                    navItems: [
+                        { id: 'home', label: 'Home' },
+                        { id: 'about', label: 'Summary' },
+                        { id: 'experience', label: 'Experience' },
+                        { id: 'certifications', label: 'Certifications' },
+                        { id: 'contact', label: 'Contact' }
+                    ],
+                    quickStats: [
+                        { value: '5+', label: 'Years Experience' },
+                        { value: '250+', label: 'Youth Impacted' },
+                        { value: '4', label: 'Certifications' },
+                        { value: '10+', label: 'Projects' }
+                    ],
+                    coreSkills: [
+                        { name: 'Threat Detection & Response', level: 92 },
+                        { name: 'Data Modeling & Normalization', level: 88 },
+                        { name: 'Entity-Relationship Diagrams', level: 85 },
+                        { name: 'Secure System Architecture', level: 87 },
+                        { name: 'IT Operations & Automation', level: 83 },
+                        { name: 'Low-Level Programming', level: 79 }
+                    ],
+                    securityDomains: ['Threat Intelligence', 'Incident Response', 'Secure Coding', 'Cloud Security', 'Digital Forensics', 'Security Automation'],
+                    experiences: [
+                        {
+                            title: 'Information Technology Lead',
+                            organization: 'Lead Research Center',
+                            location: 'South Sudan',
+                            duration: 'Feb 2025 - Present',
+                            description: 'Leading IT infrastructure and security initiatives for research center operations.',
+                            achievements: [
+                                'Implemented secure data systems for research data protection',
+                                'Developed threat detection protocols for sensitive information',
+                                'Managed IT operations across multiple research projects'
+                            ],
+                            technologies: ['Network Security', 'Data Protection', 'IT Operations']
+                        },
+                        {
+                            title: 'Climate Change & Human Mobility Design and Innovation Challenge Participant',
+                            organization: 'IOM - UN Migration',
+                            location: 'Geneva, Switzerland',
+                            duration: 'Oct 2025 - Dec 2025',
+                            description: 'Participated in a design challenge focused on creating infrastructure solutions for climate-driven displacement in partnership with African Leadership Academy.',
+                            achievements: [
+                                'Co-created actionable infrastructure solutions addressing climate-driven displacement',
+                                'Researched and designed practical solutions with digital, social, and ecological components',
+                                'Presented innovative designs to mentors, experts, and potential funders'
+                            ],
+                            technologies: ['Design Thinking', 'Climate Innovation', 'Prototyping']
+                        },
+                        {
+                            title: 'Chief Financial Officer (CFO)',
+                            organization: 'South Sudan Youth Leadership Scholars Network Program',
+                            location: 'South Sudan',
+                            duration: 'Sep 2023 - Present',
+                            description: 'Financial leadership for a youth-led NGO addressing educational deprivation in South Sudan.',
+                            achievements: [
+                                'Oversaw financial operations for national NGO with 250+ beneficiaries',
+                                'Developed funding strategies for educational programs',
+                                'Managed budgets for Refugee Nexus Hub initiative'
+                            ],
+                            technologies: ['Financial Management', 'Budget Planning', 'Grant Writing']
+                        },
+                        {
+                            title: 'Co-Founder',
+                            organization: 'konnectafrica',
+                            location: 'Juba, South Sudan',
+                            duration: 'May 2023 - Sep 2025',
+                            description: 'Co-founded an organization connecting African youth with technology and entrepreneurship opportunities.',
+                            achievements: [
+                                'Established organizational structure and strategic vision',
+                                'Developed partnership networks across 5 African countries',
+                                'Created technology education programs reaching 500+ youth'
+                            ],
+                            technologies: ['Entrepreneurship', 'Partnership Development', 'Program Management']
+                        },
+                        {
+                            title: 'Software Development Intern',
+                            organization: 'SaiKet Systems',
+                            location: 'Pune, India',
+                            duration: 'Dec 2024 - Feb 2025',
+                            description: 'Developed efficient and scalable applications while honing debugging and problem-solving skills.',
+                            achievements: [
+                                'Created maintainable, well-structured code following best practices',
+                                'Collaborated with teams using Agile methodologies',
+                                'Enhanced debugging skills through problem-solving platforms'
+                            ],
+                            technologies: ['Agile Development', 'Debugging', 'Software Design']
+                        }
+                    ],
+                    certifications: [
+                        {
+                            name: 'Certified Ethical Hacker (CEH)',
+                            issuer: 'EC-Council',
+                            year: '2023',
+                            description: 'Comprehensive ethical hacking and penetration testing certification.',
+                            icon: 'fas fa-user-secret',
+                            color: 'bg-gradient-to-br from-red-500 to-red-700',
+                            credentialId: 'ECC123456'
+                        },
+                        {
+                            name: 'Database Design',
+                            issuer: 'ALX',
+                            year: '2023',
+                            description: 'Specialized training in database normalization and data modeling.',
+                            icon: 'fas fa-database',
+                            color: 'bg-gradient-to-br from-blue-500 to-blue-700'
+                        },
+                        {
+                            name: 'Backend Development',
+                            issuer: 'ALX',
+                            year: '2023',
+                            description: 'Focusing on the hidden logic, databases, and servers that make everything work, handling data storage, processing, and user authentication, ensuring smooth communication between the user interface .',
+                            icon: 'fas fa-shield-alt',
+                            color: 'bg-gradient-to-br from-green-500 to-green-700'
+                        },
+                        {
+                            name: 'Computer Forensics',
+                            issuer: 'Moringa School',
+                            year: '2025',
+                            description: 'Specialized training in digital forensics and evidence handling.',
+                            icon: 'fas fa-search',
+                            color: 'bg-gradient-to-br from-purple-500 to-purple-700'
+                        }
+                    ],
+                    profiles: [
+                        { 
+                            name: 'LinkedIn', 
+                            icon: 'fab fa-linkedin-in', 
+                            link: 'https://www.linkedin.com/in/joshua-malong',
+                            color: 'bg-blue-600'
+                        },
+                        { 
+                            name: 'GitHub', 
+                            icon: 'fab fa-github', 
+                            link: 'https://malongmak.github.io/Malong-Maker-portf010',
+                            color: 'bg-gray-800'
+                        },
+                        { 
+                            name: 'Google Scholar', 
+                            icon: 'fas fa-graduation-cap', 
+                            link: 'https://scholar.google.com/citations',
+                            color: 'bg-green-600'
+                        },
+                        { 
+                            name: 'Portfolio', 
+                            icon: 'fas fa-link', 
+                            link: 'https://linktr.ee/Malong_Maker',
+                            color: 'bg-yellow-500'
+                        }
+                    ]
+                }
+            },
+            methods: {
+                toggleMenu() {
+                    this.menuOpen = !this.menuOpen;
+                },
+                scrollTo(sectionId) {
+                    this.activeSection = sectionId;
+                    const element = document.getElementById(sectionId);
+                    if (element) {
+                        window.scrollTo({
+                            top: element.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                },
+                submitContact() {
+                    this.formSubmitted = true;
+                    
+                    this.contact = {
+                        name: '',
+                        email: '',
+                        subject: '',
+                        message: ''
+                    };
+                    
+                    setTimeout(() => {
+                        this.formSubmitted = false;
+                    }, 5000);
+                },
+                handleScroll() {
+                    this.showTopButton = window.scrollY > 500;
+                    
+                    const sections = ['home', 'about', 'experience', 'certifications', 'contact'];
+                    for (const section of sections) {
+                        const element = document.getElementById(section);
+                        if (element) {
+                            const rect = element.getBoundingClientRect();
+                            if (rect.top <= 150 && rect.bottom >= 150) {
+                                this.activeSection = section;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    this.checkSectionVisibility();
+                    this.animateSkillBars();
+                },
+                checkSectionVisibility() {
+                    const sections = [
+                        { id: 'home', ref: 'heroVisible' },
+                        { id: 'about', ref: 'aboutVisible' },
+                        { id: 'experience', ref: 'experienceVisible' },
+                        { id: 'certifications', ref: 'certificationsVisible' },
+                        { id: 'contact', ref: 'contactVisible' }
+                    ];
+                    
+                    sections.forEach(section => {
+                        const element = document.getElementById(section.id);
+                        if (element) {
+                            const rect = element.getBoundingClientRect();
+                            if (rect.top < window.innerHeight * 0.75 && rect.bottom > 0) {
+                                this[section.ref] = true;
+                            }
+                        }
+                    });
+                },
+                animateSkillBars() {
+                    const skills = document.querySelectorAll('.skill-progress');
+                    skills.forEach(skill => {
+                        const rect = skill.getBoundingClientRect();
+                        if (rect.top < window.innerHeight && rect.bottom > 0 && skill.style.width === '0px') {
+                            const width = skill.getAttribute('data-width');
+                            skill.style.width = width + '%';
+                        }
+                    });
+                }
+            },
+            mounted() {
+                setTimeout(() => {
+                    this.loading = false;
+                    this.heroVisible = true;
+                    
+                    new BackgroundNameAnimation();
+                    new ThreeDataNetwork();
+                    new ParticleSystem();
+                }, 1500);
+                
+                window.addEventListener('scroll', this.handleScroll);
+                this.handleScroll();
+            },
+            beforeDestroy() {
+                window.removeEventListener('scroll', this.handleScroll);
+            }
+        });
+
+        new Vue({
+            el: '#app'
+        });
+    </script>
+</body>
+</html>
